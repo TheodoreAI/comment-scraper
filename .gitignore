@@ -18,6 +18,9 @@ env/
 .idea/
 .vscode/
 *.swp
+
+# Streamlit secrets
+.streamlit/secrets.toml
 *.swo
 
 # Environment variables

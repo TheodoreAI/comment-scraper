@@ -63,7 +63,16 @@ class YouTubeAPIClient(LoggerMixin):
         rate_limit_config = self.config.get_rate_limit_config()
         
         # API configuration
-        self.api_key = youtube_config.get('api_key')
+        # Try to get API key from Streamlit secrets first
+        try:
+            import streamlit as st
+            if 'youtube_api_token' in st.secrets:
+                self.api_key = st.secrets.youtube_api_token
+            else:
+                self.api_key = youtube_config.get('api_key')
+        except (ImportError, AttributeError):
+            self.api_key = youtube_config.get('api_key')
+            
         self.api_service_name = youtube_config.get('api_service_name', 'youtube')
         self.api_version = youtube_config.get('api_version', 'v3')
         
@@ -84,11 +93,19 @@ class YouTubeAPIClient(LoggerMixin):
     
     def _validate_config(self) -> None:
         """Validate the API configuration."""
+        # Try to get API key from Streamlit secrets first
+        try:
+            import streamlit as st
+            if 'youtube_api_token' in st.secrets:
+                self.api_key = st.secrets.youtube_api_token
+        except (ImportError, AttributeError):
+            pass  # Not running in Streamlit or secret not found
+            
         if not self.api_key:
             raise YouTubeAPIError("YouTube API key is not configured")
         
         if self.api_key == "YOUR_YOUTUBE_API_KEY_HERE":
-            raise YouTubeAPIError("Please set a valid YouTube API key in config.yaml")
+            raise YouTubeAPIError("Please set a valid YouTube API key in config.yaml or Streamlit secrets")
         
         if self.max_results_per_request > 100:
             self.logger.warning("max_results_per_request > 100, setting to 100 (API limit)")

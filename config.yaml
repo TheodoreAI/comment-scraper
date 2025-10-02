@@ -2,7 +2,7 @@
 
 # YouTube Data API v3 Settings
 youtube:
-  api_key: "AIzaSyB5TnXFB5mrLbBLmNDZjyV5wIZ62feauFQ"  # Get from Google Cloud Console
+  api_key: "YOUR_YOUTUBE_API_KEY_HERE"  # Get from Google Cloud Console
   api_service_name: "youtube"
   api_version: "v3"
   max_results_per_request: 100  # Max comments per API call (1-100)

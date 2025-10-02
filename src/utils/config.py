@@ -59,6 +59,15 @@ class ConfigManager:
             >>> api_key = config.get('youtube.api_key')
             >>> max_results = config.get('youtube.max_results_per_request', 100)
         """
+        # For YouTube API key, check Streamlit secrets first if running in Streamlit
+        if key == 'youtube.api_key':
+            try:
+                import streamlit as st
+                if 'youtube_api_token' in st.secrets:
+                    return st.secrets.youtube_api_token
+            except (ImportError, AttributeError):
+                pass  # Not running in Streamlit or secret not found
+        
         keys = key.split('.')
         value = self._config
         
