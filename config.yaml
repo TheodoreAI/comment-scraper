@@ -1,0 +1,47 @@
+# YouTube Comment Scraper Configuration
+
+# YouTube Data API v3 Settings
+youtube:
+  api_key: "AIzaSyB5TnXFB5mrLbBLmNDZjyV5wIZ62feauFQ"  # Get from Google Cloud Console
+  api_service_name: "youtube"
+  api_version: "v3"
+  max_results_per_request: 100  # Max comments per API call (1-100)
+  max_total_comments: 1000      # Max total comments to fetch per video
+
+# Rate Limiting
+rate_limit:
+  requests_per_second: 1        # Requests per second to avoid quota issues
+  quota_limit_per_day: 10000    # Daily quota limit (adjust based on your quota)
+  
+# Data Storage
+storage:
+  database_path: "data/comments.db"
+  raw_data_path: "data/raw"
+  processed_data_path: "data/processed"
+  exports_path: "data/exports"
+
+# Logging
+logging:
+  level: "INFO"                 # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  log_file: "logs/scraper.log"
+  max_log_size_mb: 10
+  backup_count: 5
+
+# Comment Filtering
+filters:
+  min_comment_length: 1         # Minimum characters in comment
+  max_comment_length: 10000     # Maximum characters in comment
+  exclude_spam: true            # Attempt to filter spam comments
+  languages: ["en"]             # List of language codes to include (empty = all)
+
+# Export Settings
+export:
+  csv_encoding: "utf-8"
+  include_metadata: true        # Include video metadata in exports
+  timestamp_format: "%Y-%m-%d %H:%M:%S"
+
+# Development Settings
+development:
+  debug_mode: false
+  test_video_id: "dQw4w9WgXcQ"  # Rick Roll for testing
+  cache_enabled: true           # Cache API responses for development
