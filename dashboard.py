@@ -38,6 +38,17 @@ try:
     from src.visualization.chart_generator import ChartGenerator
     from src.utils.config import ConfigManager
     from src.utils.helpers import extract_video_id
+    from src.frontend.utils.render_utils import (
+        load_dashboard_styles,
+        render_header,
+        render_metrics_row,
+        render_video_info,
+        render_loading_spinner,
+        render_success_message,
+        render_warning_message,
+        render_chart_container,
+        render_data_table
+    )
 except ImportError as e:
     st.error(f"Error importing modules: {e}")
     st.stop()
@@ -49,6 +60,9 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Load dashboard styles
+load_dashboard_styles()
 
 # Custom CSS for better styling
 st.markdown("""
