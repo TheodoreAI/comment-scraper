@@ -394,9 +394,94 @@ def show_analysis_page(extractor, analyzer, chart_generator):
     st.markdown("### 🧠 Step 2: Generate Sentiment Analysis")
     
     if st.session_state.extraction_complete and st.session_state.current_video_id:
-        
         if st.button("📈 Generate Analysis & Charts", type="primary", use_container_width=True):
             video_id = st.session_state.current_video_id
+            # Your existing sentiment analysis code here...
+            
+    # Likes Analysis section
+    st.markdown("---")
+    st.markdown("### 👍 Step 3: Likes Analysis")
+    
+    if st.session_state.extraction_complete and st.session_state.current_video_id:
+        if st.button("❤️ Show Likes Analysis", type="primary", use_container_width=True, key="likes_button"):
+            video_id = st.session_state.current_video_id
+            try:
+                conn = sqlite3.connect('data/comments.db')
+                
+                # Get video likes
+                video_df = pd.read_sql_query(
+                    "SELECT title, like_count FROM videos WHERE video_id = ?",
+                    conn,
+                    params=(video_id,)
+                )
+                
+                # Get comment likes data
+                comments_df = pd.read_sql_query(
+                    """
+                    SELECT comment_id, text, like_count
+                    FROM comments 
+                    WHERE video_id = ?
+                    ORDER BY like_count DESC
+                    LIMIT 10
+                    """,
+                    conn,
+                    params=(video_id,)
+                )
+                
+                # Show video engagement metrics
+                if not video_df.empty:
+                    st.subheader("📊 Video Engagement Metrics")
+                    video_metrics = {
+                        "Total Likes": f"{video_df.iloc[0]['like_count']:,}"
+                    }
+                    
+                    st.info("""
+                    ℹ️ **Note:** YouTube removed public access to dislike counts in December 2021 to reduce targeted dislike campaigns and protect creators.
+                    The API now only provides like counts and other engagement metrics.
+                    """)
+                
+                # Create likes comparison visualization
+                st.subheader("Top 10 Most Liked Comments")
+                
+                if comments_df.empty:
+                    st.warning("No comments with likes found for this video.")
+                else:
+                    # Calculate percentage of video likes for each comment
+                    if not video_df.empty and video_df.iloc[0]['like_count'] > 0:
+                        comments_df['like_percentage'] = (comments_df['like_count'] / video_df.iloc[0]['like_count'] * 100)
+                    
+                    fig = go.Figure()
+                    
+                    # Add bars for comment likes
+                    fig.add_trace(go.Bar(
+                        x=comments_df['like_count'],
+                        y=comments_df['text'].str[:50] + '...',  # Truncate long comments
+                        orientation='h',
+                        name='Comment Likes',
+                        marker_color='rgb(55, 83, 109)',
+                        hovertemplate='Likes: %{x}<br>Percentage of Video Likes: %{customdata:.2f}%<extra></extra>'
+                    ))
+                    
+                    # Add hover data with percentage
+                    if 'like_percentage' in comments_df.columns:
+                        fig.data[0].customdata = comments_df['like_percentage']
+                    
+                    # Update layout
+                    fig.update_layout(
+                        title='Top 10 Most Liked Comments',
+                        xaxis_title='Number of Likes',
+                        yaxis_title='Comment',
+                        showlegend=True,
+                        height=500,
+                        yaxis={'autorange': 'reversed'}  # Show highest likes at top
+                    )
+                
+                conn.close()
+                
+            except Exception as e:
+                st.error(f"Error generating likes analysis: {str(e)}")
+                if 'conn' in locals():
+                    conn.close()
             
             with st.spinner("🔄 Generating sentiment analysis..."):
                 video_info, comments_df = get_sentiment_data(video_id)
