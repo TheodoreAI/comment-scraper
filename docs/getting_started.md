@@ -1,18 +1,19 @@
 # Getting Started with YouTube Comment Scraper
 
-This guide will help you set up and use the YouTube Comment Scraper tool.
+This guide will help you set up and use the YouTube Comment Scraper tool's interactive dashboard and API.
 
 ## Prerequisites
 
 - Python 3.8 or higher
 - YouTube Data API v3 key from Google Cloud Console
+- Required Python packages (specified in requirements.txt)
 
 ## Installation
 
 1. **Clone or download the project**
    ```bash
    cd /path/to/your/projects
-   # If you have the project files, navigate to the directory
+   git clone <repository-url>
    cd comment-scraper
    ```
 
@@ -42,11 +43,112 @@ This guide will help you set up and use the YouTube Comment Scraper tool.
 
 ## Configuration
 
-1. **Update the configuration file**
+There are two ways to configure your API key:
+
+### Option 1: Using config.yaml
+
+1. Copy the example configuration:
    ```bash
-   # The config.yaml file is already created with default settings
-   # You need to update the API key
+   cp config.yaml.example config.yaml
    ```
+
+2. Edit config.yaml and add your YouTube API key:
+   ```yaml
+   youtube:
+     api_key: "YOUR_API_KEY_HERE"
+   ```
+
+### Option 2: Using Streamlit Secrets (Recommended)
+
+1. Create a .streamlit/secrets.toml file:
+   ```toml
+   youtube_api_token = "YOUR_API_KEY_HERE"
+   ```
+
+## Using the Dashboard
+
+1. **Start the dashboard**
+   ```bash
+   streamlit run dashboard.py
+   ```
+
+2. **Extract Comments**
+   - Enter a YouTube video URL
+   - Set the number of comments to extract
+   - Choose comment sort order (relevance/time)
+   - Click "Extract Comments"
+
+3. **Analyze Sentiment**
+   - After extraction, click "Generate Analysis & Charts"
+   - View sentiment distribution and metrics
+   - Explore interactive visualizations
+
+4. **Engagement Analysis**
+   - View the likes analysis
+   - See top liked comments
+   - Compare comment engagement with video metrics
+
+5. **Export and History**
+   - Access previously analyzed videos
+   - Export data in CSV or JSON format
+   - View historical trends and comparisons
+
+## Using the Python API
+
+```python
+from src.scraper.comment_extractor import CommentExtractor
+from src.analysis.sentiment_analyzer import SentimentAnalyzer
+
+# Initialize components
+extractor = CommentExtractor()
+analyzer = SentimentAnalyzer()
+
+# Extract comments
+video_url = "https://www.youtube.com/watch?v=VIDEO_ID"
+results = extractor.extract_comments(
+    video_url_or_id=video_url,
+    max_comments=100,
+    order="relevance"
+)
+
+# Access data
+video_info = results['video_info']
+comments = results['comments']
+statistics = results['statistics']
+
+# Perform sentiment analysis
+sentiment_results = analyzer.analyze_comments(comments)
+```
+
+## Data Storage
+
+- Comments and metadata are stored in SQLite database (`data/comments.db`)
+- Exported data is saved in CSV/JSON format in `data/exports/`
+- Generated charts are saved in `data/charts/`
+
+## Troubleshooting
+
+Common issues and solutions:
+
+1. **API Quota Exceeded**
+   - The free tier has a daily quota limit
+   - Consider implementing request caching
+   - Use multiple API keys for higher limits
+
+2. **Missing Dependencies**
+   - Run `pip install -r requirements.txt`
+   - Check Python version compatibility
+
+3. **Database Errors**
+   - Ensure write permissions in data directory
+   - Check database connection string
+
+## Support
+
+For additional help:
+- Check the project documentation
+- Submit issues on GitHub
+- Review example notebooks in `examples/`
 
 2. **Edit config.yaml**
    ```yaml
