@@ -56,7 +56,6 @@ except ImportError as e:
 # Page configuration
 st.set_page_config(
     page_title="YouTube Comment Sentiment Analyzer",
-    page_icon="🎬",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -203,7 +202,7 @@ def main():
     """Main dashboard application."""
     
     # Header
-    st.markdown('<h1 class="main-header">🎬 YouTube Comment Sentiment Analyzer</h1>', 
+    st.markdown('<h1 class="main-header">YouTube Comment Sentiment Analyzer</h1>', 
                 unsafe_allow_html=True)
     
     # Initialize components
@@ -217,41 +216,41 @@ def main():
     st.sidebar.title("Navigation")
     page = st.sidebar.selectbox(
         "Choose a page:",
-        ["🏠 Home", "📊 Analyze Video", "📈 Video History", "ℹ️ About"]
+        ["Home", "Analyze Video", "Video History", "About"]
     )
     
-    if page == "🏠 Home":
+    if page == "Home":
         show_home_page()
-    elif page == "📊 Analyze Video":
+    elif page == "Analyze Video":
         show_analysis_page(extractor, analyzer, chart_generator)
-    elif page == "📈 Video History":
+    elif page == "Video History":
         show_history_page()
-    elif page == "ℹ️ About":
+    elif page == "About":
         show_about_page()
 
 def show_home_page():
     """Show the home page with overview and instructions."""
     
-    st.markdown("## Welcome to the YouTube Comment Sentiment Analyzer! 🚀")
+    st.markdown("## Welcome to the YouTube Comment Sentiment Analyzer!")
     
     st.markdown("""
     This powerful dashboard allows you to:
     
-    ### 🎯 **Key Features**
+    ### Key Features
     - **Extract Comments**: Get comments from any public YouTube video
     - **Sentiment Analysis**: Analyze emotions and opinions using AI
     - **Interactive Charts**: Visualize sentiment patterns and trends
     - **Real-time Processing**: Watch analysis happen in real-time
     - **Export Data**: Download results for further analysis
     
-    ### 🔧 **How to Use**
-    1. Go to **📊 Analyze Video** page
+    ### How to Use
+    1. Go to **Analyze Video** page
     2. Paste a YouTube video URL
     3. Click **Extract Comments** and wait for processing
     4. Click **Generate Analysis** to create sentiment charts
     5. Explore your results with interactive visualizations!
     
-    ### 📈 **What You'll Get**
+    ### What You'll Get
     - Sentiment distribution (positive/negative/neutral)
     - Emotion strength analysis
     - Word clouds of common themes
@@ -268,11 +267,11 @@ def show_home_page():
         
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("📹 Videos Analyzed", total_videos)
+            st.metric("Videos Analyzed", total_videos)
         with col2:
-            st.metric("💬 Comments Processed", f"{total_comments:,}" if total_comments else "0")
+            st.metric("Comments Processed", f"{total_comments:,}" if total_comments else "0")
         with col3:
-            st.metric("🧠 AI Models Used", "TextBlob + VADER")
+            st.metric("AI Models Used", "TextBlob + VADER")
             
     except Exception:
         st.info("No data available yet. Start by analyzing your first video!")
@@ -280,10 +279,10 @@ def show_home_page():
 def show_analysis_page(extractor, analyzer, chart_generator):
     """Show the main analysis page."""
     
-    st.markdown("## 📊 Video Analysis")
+    st.markdown("## Video Analysis")
     
     # Video URL input
-    st.markdown("### 🎬 Step 1: Enter Video URL")
+    st.markdown("### Step 1: Enter Video URL")
     video_url = st.text_input(
         "Paste YouTube video URL here:",
         placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
@@ -310,7 +309,7 @@ def show_analysis_page(extractor, analyzer, chart_generator):
         )
     
     # Extract comments button
-    if st.button("🔄 Extract Comments", type="primary", use_container_width=True):
+    if st.button("Extract Comments", type="primary", use_container_width=True):
         if not video_url.strip():
             st.error("Please enter a YouTube video URL")
             return
@@ -325,10 +324,10 @@ def show_analysis_page(extractor, analyzer, chart_generator):
         status_text = st.empty()
         
         try:
-            status_text.text("🔍 Validating video URL...")
+            status_text.text("Validating video URL...")
             progress_bar.progress(10)
             
-            status_text.text("📥 Starting comment extraction...")
+            status_text.text("Starting comment extraction...")
             progress_bar.progress(25)
             
             # Extract comments
@@ -341,13 +340,13 @@ def show_analysis_page(extractor, analyzer, chart_generator):
             )
             
             progress_bar.progress(75)
-            status_text.text("🧠 Performing sentiment analysis...")
+            status_text.text("Performing sentiment analysis...")
             
             # Small delay to show progress
             time.sleep(1)
             
             progress_bar.progress(100)
-            status_text.text("✅ Extraction completed!")
+            status_text.text("Extraction completed!")
             
             # Store results in session state
             st.session_state.extraction_complete = True
@@ -391,14 +390,99 @@ def show_analysis_page(extractor, analyzer, chart_generator):
     
     # Analysis section
     st.markdown("---")
-    st.markdown("### 🧠 Step 2: Generate Sentiment Analysis")
+    st.markdown("### Step 2: Generate Sentiment Analysis")
     
     if st.session_state.extraction_complete and st.session_state.current_video_id:
-        
-        if st.button("📈 Generate Analysis & Charts", type="primary", use_container_width=True):
+        if st.button("Generate Analysis & Charts", type="primary", use_container_width=True):
             video_id = st.session_state.current_video_id
+            # Your existing sentiment analysis code here...
             
-            with st.spinner("🔄 Generating sentiment analysis..."):
+    # Likes Analysis section
+    st.markdown("---")
+    st.markdown("### Step 3: Likes Analysis")
+    
+    if st.session_state.extraction_complete and st.session_state.current_video_id:
+        if st.button("Show Likes Analysis", type="primary", use_container_width=True, key="likes_button"):
+            video_id = st.session_state.current_video_id
+            try:
+                conn = sqlite3.connect('data/comments.db')
+                
+                # Get video likes
+                video_df = pd.read_sql_query(
+                    "SELECT title, like_count FROM videos WHERE video_id = ?",
+                    conn,
+                    params=(video_id,)
+                )
+                
+                # Get comment likes data
+                comments_df = pd.read_sql_query(
+                    """
+                    SELECT comment_id, text, like_count
+                    FROM comments 
+                    WHERE video_id = ?
+                    ORDER BY like_count DESC
+                    LIMIT 10
+                    """,
+                    conn,
+                    params=(video_id,)
+                )
+                
+                # Show video engagement metrics
+                if not video_df.empty:
+                    st.subheader("Video Engagement Metrics")
+                    video_metrics = {
+                        "Total Likes": f"{video_df.iloc[0]['like_count']:,}"
+                    }
+                    
+                    st.info("""
+                    **Note:** YouTube removed public access to dislike counts in December 2021 to reduce targeted dislike campaigns and protect creators.
+                    The API now only provides like counts and other engagement metrics.
+                    """)
+                
+                # Create likes comparison visualization
+                st.subheader("Top 10 Most Liked Comments")
+                
+                if comments_df.empty:
+                    st.warning("No comments with likes found for this video.")
+                else:
+                    # Calculate percentage of video likes for each comment
+                    if not video_df.empty and video_df.iloc[0]['like_count'] > 0:
+                        comments_df['like_percentage'] = (comments_df['like_count'] / video_df.iloc[0]['like_count'] * 100)
+                    
+                    fig = go.Figure()
+                    
+                    # Add bars for comment likes
+                    fig.add_trace(go.Bar(
+                        x=comments_df['like_count'],
+                        y=comments_df['text'].str[:50] + '...',  # Truncate long comments
+                        orientation='h',
+                        name='Comment Likes',
+                        marker_color='rgb(55, 83, 109)',
+                        hovertemplate='Likes: %{x}<br>Percentage of Video Likes: %{customdata:.2f}%<extra></extra>'
+                    ))
+                    
+                    # Add hover data with percentage
+                    if 'like_percentage' in comments_df.columns:
+                        fig.data[0].customdata = comments_df['like_percentage']
+                    
+                    # Update layout
+                    fig.update_layout(
+                        title='Top 10 Most Liked Comments',
+                        xaxis_title='Number of Likes',
+                        yaxis_title='Comment',
+                        showlegend=True,
+                        height=500,
+                        yaxis={'autorange': 'reversed'}  # Show highest likes at top
+                    )
+                
+                conn.close()
+                
+            except Exception as e:
+                st.error(f"Error generating likes analysis: {str(e)}")
+                if 'conn' in locals():
+                    conn.close()
+            
+            with st.spinner("Generating sentiment analysis..."):
                 video_info, comments_df = get_sentiment_data(video_id)
                 
                 if video_info is None or comments_df.empty:
@@ -413,11 +497,11 @@ def show_analysis_page(extractor, analyzer, chart_generator):
                 show_sentiment_results(video_info, comments_df, sentiment_summary, chart_generator)
     
     elif not st.session_state.extraction_complete:
-        st.info("👆 Please extract comments first using Step 1 above")
+        st.info("Please extract comments first using Step 1 above")
     
     # Quick analysis for existing videos
     st.markdown("---")
-    st.markdown("### 🔍 Or Analyze Previously Extracted Video")
+    st.markdown("### Or Analyze Previously Extracted Video")
     
     history_df = get_video_history()
     if not history_df.empty:
@@ -427,7 +511,7 @@ def show_analysis_page(extractor, analyzer, chart_generator):
             format_func=lambda x: f"{history_df[history_df['video_id']==x]['title'].iloc[0][:50]}..."
         )
         
-        if st.button("📊 Analyze Selected Video", use_container_width=True):
+        if st.button("Analyze Selected Video", use_container_width=True):
             video_info, comments_df = get_sentiment_data(selected_video)
             
             if video_info is not None and not comments_df.empty:
@@ -441,7 +525,7 @@ def show_analysis_page(extractor, analyzer, chart_generator):
 def show_sentiment_results(video_info, comments_df, sentiment_summary, chart_generator):
     """Display comprehensive sentiment analysis results."""
     
-    st.markdown("## 🎯 Sentiment Analysis Results")
+    st.markdown("## Sentiment Analysis Results")
     
     # Overview metrics
     col1, col2, col3, col4 = st.columns(4)
@@ -477,7 +561,7 @@ def show_sentiment_results(video_info, comments_df, sentiment_summary, chart_gen
         )
     
     # Sentiment distribution chart
-    st.markdown("### 📊 Sentiment Distribution")
+    st.markdown("### Sentiment Distribution")
     
     sentiment_dist = sentiment_summary['sentiment_distribution']
     
